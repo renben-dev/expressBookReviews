@@ -89,7 +89,7 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
   //Write your code here
 
   const isbn = (req.params.isbn || '').trim();
-  const reviewer = req.session.username;
+  const reviewer = req.session.authorization.username;
   const rating = parseInt(req.body.rating);
   const reviewText = (req.body.review || '').trim();
   const selBook = books[isbn];
@@ -110,7 +110,7 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     return res.status(400).send("Reviews must have at least 5 characters");
   }
 
-  const existingReview = selBook.reviews.find((review) => review.reviewer === reviewer);
+  const existingReview = Object.values(selBook.reviews).find((review) => review.reviewer === reviewer);
 
   if(existingReview) {
     existingReview.rating = rating;
