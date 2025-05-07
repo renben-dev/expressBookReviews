@@ -41,13 +41,48 @@ function isValidPassword(password) {
 
 const authenticatedUser = (username,password)=>{ //returns boolean
 //write code to check if username and password match the one we have in records.
+    return !!users.find((user) => user.username === username && user.password === password);
 }
 
 //only registered users can login
 regd_users.post("/login", (req,res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
-});
+    //Write your code here
+      const username = req.body.username;
+      const password = req.body.password;
+      let msg = "";
+      
+      if(!password){
+          msg +="Please provide password.\n"        
+      }
+  
+      if(!username){
+          msg +="Please provide username.\n"        
+      }
+  
+      if(msg!=="") {
+          return res.status(400).send("To login:\n" + msg);
+      }
+  
+      // Authenticate user
+      if (authenticatedUser(username, password)) {
+          // Generate JWT access token
+          let accessToken = jwt.sign({
+              data: password
+          }, 'temporary_dummy_secret_for_course', { expiresIn: 60 * 60 });
+  
+          // Store access token and username in session
+          req.session.authorization = {
+              accessToken, username
+          }
+          return res.status(200).send("User successfully logged in");
+      } else {
+          return res.status(401).json({ message: "Invalid Login. Check username and password" });
+      }
+      
+     
+  
+    //return res.status(300).json({message: "Yet to be implemented"});
+  });
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {

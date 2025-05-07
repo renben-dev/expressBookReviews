@@ -23,7 +23,7 @@ public_users.post("/register", (req,res) => {
         msg +="Please provide username.\n"        
     } else if(!isValid(username)) {
         msg += "Username is not valid.\n";
-    } else if(users.filter((user) => user.username.lowercase() === username.lowercase()).length !==0){
+    } else if(users.filter((user) => user.username.toLowerCase() === username.toLowerCase()).length !==0){
         msg += "Username " + username + " is already registered or not available\n";
     }
 
