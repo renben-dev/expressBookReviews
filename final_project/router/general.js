@@ -40,7 +40,7 @@ public_users.get('/isbn/:isbn?',function (req, res) {
   if(isbn) {
     const selBook = books[isbn];
     if(selBook){
-        return res.send(selBook);
+        return res.send(JSON.stringify(selBook, null, 4));
     } else {
         return res.status(404).send("No books exist with ISBN = " + isbn);
     }
@@ -62,7 +62,7 @@ public_users.get('/author/:author?',function (req, res) {
         book.author.toLowerCase().includes(author.toLowerCase())
       );
     if(selBooks.length > 0){
-        return res.send(selBooks);
+        return res.send(JSON.stringify(selBooks, null, 4));
     } else {
         return res.status(404).send("No books exist with author containing '" + author+"'");
     }
@@ -103,7 +103,16 @@ public_users.get('/review/:isbn?',function (req, res) {
   if(isbn) {
     const selBook = books[isbn];
     if(selBook){
-        return res.send(selBook);
+        const {reviews, ...selBookDetail} = selBook;
+        let reviewsExist = true;
+        if (Object.keys(selBook.reviews).length === 0) {
+            reviewsExist = false;
+        };
+        if(reviewsExist) {
+            return res.send("Reviews for book:\n\nISBN: " + isbn + "\n" + JSON.stringify(selBookDetail) + "\n\nReviews:\n" + JSON.stringify(selBook.reviews, null, 4));
+        } else {
+            return res.send("There are no reviews yet for book: ISBN: " + isbn +" " + JSON.stringify(selBookDetail, null, 4));
+        }
     } else {
         return res.status(404).send("Cannot provide reviews. No books exist with ISBN = " + isbn);
     }
