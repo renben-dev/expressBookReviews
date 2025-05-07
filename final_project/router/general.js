@@ -33,11 +33,11 @@ public_users.get('/',function (req, res) {
 });
 
 // Get book details based on ISBN
-public_users.get('/isbn/:isbn',function (req, res) {
+public_users.get('/isbn/:isbn?',function (req, res) {
   //Write your code here
   let isbn = req.params.isbn;
+  isbn = (isbn || '').trim();
   if(isbn) {
-    isbn = isbn.trim();
     const selBook = books[isbn];
     if(selBook){
         return res.send(selBook);
@@ -52,38 +52,67 @@ public_users.get('/isbn/:isbn',function (req, res) {
  });
   
 // Get book details based on author
-public_users.get('/author/:author',function (req, res) {
+public_users.get('/author/:author?',function (req, res) {
   //Write your code here
   let author = req.params.author;
+  author = (author || '').trim();
   if(author) {
-    author = author.trim();
-    //const selBooks = const book = Object.values(books).filter(book => book.author === author);
     //case insensitive search and 'contains' search
     const selBooks = Object.values(books).filter(book =>
         book.author.toLowerCase().includes(author.toLowerCase())
       );
-    if(selBooks){
+    if(selBooks.length > 0){
         return res.send(selBooks);
     } else {
         return res.status(404).send("No books exist with author containing '" + author+"'");
     }
   }
   else {
-    return res.status(400).send("No author provided. Please send author in GET request.");
+    return res.status(400).send("No author provided. Please send author or substring of author in GET request.");
   }
   //return res.status(300).json({message: "Yet to be implemented"});
 });
 
 // Get all books based on title
-public_users.get('/title/:title',function (req, res) {
+public_users.get('/title/:title?',function (req, res) {
   //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  let title = req.params.title;
+  title = (title || '').trim();
+  if(title) {    
+    //case insensitive search and 'contains' search
+    const selBooks = Object.values(books).filter(book =>
+        book.title.toLowerCase().includes(title.toLowerCase())
+      );
+    if(selBooks.length > 0){
+        return res.send(selBooks);
+    } else {
+        return res.status(404).send("No books exist with title containing '" + title +"'");
+    }
+  }
+  else {
+    return res.status(400).send("No title provided. Please send title or substring of title in GET request.");
+  }
+  //return res.status(300).json({message: "Yet to be implemented"});
 });
 
 //  Get book review
-public_users.get('/review/:isbn',function (req, res) {
+public_users.get('/review/:isbn?',function (req, res) {
   //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  let isbn = req.params.isbn;
+  isbn = (isbn || '').trim();
+  if(isbn) {
+    const selBook = books[isbn];
+    if(selBook){
+        return res.send(selBook);
+    } else {
+        return res.status(404).send("Cannot provide reviews. No books exist with ISBN = " + isbn);
+    }
+  }
+  else {
+    return res.status(400).send("No ISBN provided. Please send ISBN in GET request.");
+  }
+
+  //return res.status(300).json({message: "Yet to be implemented"});
 });
 
 module.exports.general = public_users;
