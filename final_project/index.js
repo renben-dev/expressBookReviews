@@ -17,7 +17,7 @@ app.use("/customer/auth/*", function auth(req,res,next){
         let token = req.session.authorization['accessToken'];
 
         // Verify JWT token
-        jwt.verify(token, "access", (err, user) => {
+        jwt.verify(token, "dummy_secret", (err, user) => {
             if (!err) {
                 req.user = user;
                 next(); // Proceed to the next middleware

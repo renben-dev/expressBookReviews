@@ -68,7 +68,7 @@ regd_users.post("/login", (req,res) => {
           // Generate JWT access token
           let accessToken = jwt.sign({
               data: password
-          }, 'temporary_dummy_secret_for_course', { expiresIn: 60 * 60 });
+          }, 'dummy_secret', { expiresIn: 60 * 60 });
   
           // Store access token and username in session
           req.session.authorization = {
@@ -125,7 +125,7 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
         "rating"    :   rating,
         "review"    :   reviewText
     };
-    return res.send("Dear " + reviewer + " you review has been added. Thank you for contributibg");
+    return res.send("Dear " + reviewer + " you review has been added. Thank you for contributing\n\nReviews to book ISBN: " +isbn +", '" + selBook.title + "' by " +selBook.author +"\n\nReviews: " + JSON.stringify(selReviews));
   }
   //return res.status(300).json({message: "Yet to be implemented"});
 });
