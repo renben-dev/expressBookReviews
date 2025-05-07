@@ -1,14 +1,42 @@
 const express = require('express');
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
+let isValidPassword = require("./auth_users.js").isValidPassword;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
 
+
 public_users.post("/register", (req,res) => {
   //Write your code here
+    const username = req.body.username;
+    const password = req.body.password;
+    let msg = "";
+    
+    if(!password){
+        msg +="Please provide password.\n"        
+    } else if(!isValidPassword(password)) {
+        msg += "Password is not valid.\n";
+    }
+
+    if(!username){
+        msg +="Please provide username.\n"        
+    } else if(!isValid(username)) {
+        msg += "Username is not valid.\n";
+    } else if(users.filter((user) => user.username.lowercase() === username.lowercase()).length !==0){
+        msg += "Username " + username + " is already registered or not available\n";
+    }
+
+    if(msg!=="") {
+        return res.status(400).send(msg)
+    } 
+    else {
+        users.push({"username": username, "password": password});
+        return res.send("User " + username + " was succesfully registed, and can login.");
+    }
+
    
-    return res.status(300).json({message: "Yet to be implemented"});
+    //return res.status(300).json({message: "Yet to be implemented"});
 });
 
 // Get the book list available in the shop

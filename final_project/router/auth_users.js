@@ -6,7 +6,37 @@ const regd_users = express.Router();
 let users = [];
 
 const isValid = (username)=>{ //returns boolean
-//write code to check is the username is valid
+    //write code to check is the username is valid
+    // Regex: 3-20 chars, letters/numbers/underscores/hyphens, starts with a letter
+    const regex = /^[a-zA-Z][a-zA-Z0-9_-]{2,19}$/;
+    const uname = username ?? '';
+    return regex.test(uname);
+}
+
+
+/**
+ * Password Validation Rules (Regex Breakdown)
+ * --------------------------------------------------------------------------
+ * | Rule                  | Regex Pattern         | Examples               |
+ * |-----------------------|-----------------------|-------------------------|
+ * | Minimum length (8+)   | {8,}                 | 'A1b@cde' (valid)      |
+ * | At least 1 lowercase  | (?=.*[a-z])          | 'a' in 'Pass1!'        |
+ * | At least 1 uppercase  | (?=.*[A-Z])          | 'P' in 'Pass1!'        |
+ * | At least 1 digit      | (?=.*\d)             | '1' in 'Pass1!'        |
+ * | At least 1 special    | (?=.*[@$!%*?&])      | '!' in 'Pass1!'        |
+ * | Allowed chars only    | [A-Za-z\d@$!%*?&]    | Rejects 'Pass 1' (space)|
+ * --------------------------------------------------------------------------
+ * 
+ * Full Regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+ * 
+ * Customization Options:
+ * - minLength: Change {8,} to desired length (e.g., {12,})
+ * - specialChars: Modify [@$!%*?&] to allow/disallow symbols
+ * - Relax rules: Remove (?=.*[X]) conditions as needed
+ */
+function isValidPassword(password) {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return regex.test(password);
 }
 
 const authenticatedUser = (username,password)=>{ //returns boolean
@@ -27,4 +57,5 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
+module.exports.isValidPassword = isValidPassword;
 module.exports.users = users;
