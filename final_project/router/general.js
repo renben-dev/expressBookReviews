@@ -72,22 +72,7 @@ public_users.get('/books', (req, res) => {
   res.send(JSON.stringify(books, null, 4));
 });
 
-// Simulates API to get books from a DB
-const retrieveBooks = async () => {
-  try {
-    const response = await axios.get('http://localhost:5000/books');
-    const books = response.data;
-    // Check if books exist
-    if (Array.isArray(books) && books.length > 0) {
-        return books;
-    } else {
-        return { books: [], message: "No books available" };
-    }
-  } catch (error) {
-    console.error('Error retreiving books:', error);
-    throw error;
-  }
-};
+
 
 // GET route to fetch book list from the root endpoint '/'
 public_users.get('/', async (req, res) => {
@@ -112,7 +97,8 @@ public_users.get('/', async (req, res) => {
   }
 });
 
-// // Get book details based on ISBN
+
+
 // public_users.get('/isbn/:isbn?',function (req, res) {
 //   //Write your code here
 //   let isbn = req.params.isbn;
@@ -144,59 +130,119 @@ public_users.get('/isbn/:isbn?',async (req, res) => {
             } else {
                 return res.status(404).send("No books exist with ISBN = " + isbn);
             }
-            }
-        else {
+        } else {
             return res.status(400).send("No ISBN provided. Please send ISBN in GET request.");
         }
     } catch(error) {
         return res.status(500).send("An error occured while retrieving ISBN book data");
-    }
-  
+    }  
+});
+
+
+
+//Async/await API endpoint to GET books by author
+public_users.get('/author/:author?',async (req, res) => {
+    try {
+        let author = req.params.author;
+        author = (author || '').trim();
+        const books = await retrieveBooks();        
+        if(author) { //case insensitive search and 'contains' search
+            const selBooks = Object.values(books).filter(book =>
+                book.author.toLowerCase().includes(author.toLowerCase()));
+            if(selBooks.length > 0){
+                return res.send(JSON.stringify(selBooks, null, 4));
+            } else {
+                return res.status(404).send("No books exist with author containing '" + author+"'");
+            }
+        } else {
+            return res.status(400).send("No author provided. Please send author or substring of author in GET request.");
+        }
+    } catch(error) {
+        return res.status(500).send("An error occured while retrieving book data ny author");
+    }  
 });
   
 // Get book details based on author
-public_users.get('/author/:author?',function (req, res) {
-  //Write your code here
-  let author = req.params.author;
-  author = (author || '').trim();
-  if(author) {
-    //case insensitive search and 'contains' search
-    const selBooks = Object.values(books).filter(book =>
-        book.author.toLowerCase().includes(author.toLowerCase())
-      );
-    if(selBooks.length > 0){
-        return res.send(JSON.stringify(selBooks, null, 4));
-    } else {
-        return res.status(404).send("No books exist with author containing '" + author+"'");
+// public_users.get('/author/:author?',function (req, res) {
+//   //Write your code here
+//   let author = req.params.author;
+//   author = (author || '').trim();
+//   if(author) {
+//     //case insensitive search and 'contains' search
+//     const selBooks = Object.values(books).filter(book =>
+//         book.author.toLowerCase().includes(author.toLowerCase())
+//       );
+//     if(selBooks.length > 0){
+//         return res.send(JSON.stringify(selBooks, null, 4));
+//     } else {
+//         return res.status(404).send("No books exist with author containing '" + author+"'");
+//     }
+//   }
+//   else {
+//     return res.status(400).send("No author provided. Please send author or substring of author in GET request.");
+//   }
+//   //return res.status(300).json({message: "Yet to be implemented"});
+// });
+
+// Simulates API to get books from a DB
+const retrieveBooks = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/books');
+      const books = response.data;
+      // Check if books exist
+      if (books && typeof books === 'object' && Object.keys(books).length > 0) {
+          return books;
+      } else {
+          return { books: {}, message: "No books available" };
+      }
+    } catch (error) {
+      console.error('Error retreiving books:', error);
+      throw error;
     }
-  }
-  else {
-    return res.status(400).send("No author provided. Please send author or substring of author in GET request.");
-  }
-  //return res.status(300).json({message: "Yet to be implemented"});
+};
+//Async/await API endpoint to GET books by author
+public_users.get('/title/:title?',async (req, res) => {
+    try {
+        let title = req.params.title;
+        title = (title || '').trim();
+        const books = await retrieveBooks();        
+        if(title) { //case insensitive search and 'contains' search
+            const selBooks = Object.values(books).filter(book =>
+                book.title.toLowerCase().includes(title.toLowerCase()));
+            if(selBooks.length > 0){
+                return res.send(JSON.stringify(selBooks, null, 4));
+            } else {
+                return res.status(404).send("No books exist with title containing '" + title +"'");
+            }
+        } else {
+            return res.status(400).send("No title provided. Please send title or substring of title in GET request.");
+        }
+    } catch(error) {
+        return res.status(500).send("An error occured while retrieving book data by title");
+    }  
 });
 
-// Get all books based on title
-public_users.get('/title/:title?',function (req, res) {
-  //Write your code here
-  let title = req.params.title;
-  title = (title || '').trim();
-  if(title) {    
-    //case insensitive search and 'contains' search
-    const selBooks = Object.values(books).filter(book =>
-        book.title.toLowerCase().includes(title.toLowerCase())
-      );
-    if(selBooks.length > 0){
-        return res.send(selBooks);
-    } else {
-        return res.status(404).send("No books exist with title containing '" + title +"'");
-    }
-  }
-  else {
-    return res.status(400).send("No title provided. Please send title or substring of title in GET request.");
-  }
-  //return res.status(300).json({message: "Yet to be implemented"});
-});
+// // Get all books based on title
+// public_users.get('/title/:title?',function (req, res) {
+//   //Write your code here
+//   let title = req.params.title;
+//   title = (title || '').trim();
+//   if(title) {    
+//     //case insensitive search and 'contains' search
+//     const selBooks = Object.values(books).filter(book =>
+//         book.title.toLowerCase().includes(title.toLowerCase())
+//       );
+//     if(selBooks.length > 0){
+//         return res.send(selBooks);
+//     } else {
+//         return res.status(404).send("No books exist with title containing '" + title +"'");
+//     }
+//   }
+//   else {
+//     return res.status(400).send("No title provided. Please send title or substring of title in GET request.");
+//   }
+//   //return res.status(300).json({message: "Yet to be implemented"});
+// });
 
 //  Get book review
 public_users.get('/review/:isbn?',function (req, res) {
