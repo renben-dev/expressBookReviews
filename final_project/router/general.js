@@ -1,4 +1,5 @@
 const express = require('express');
+const axios = require('axios');
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let isValidPassword = require("./auth_users.js").isValidPassword;
@@ -74,7 +75,6 @@ public_users.get('/books', (req, res) => {
 // Simulates API to get books from a DB
 const retrieveBooks = async () => {
   try {
-    // Fetching from the local endpoint
     const response = await axios.get('http://localhost:5000/books');
     const books = response.data;
     // Check if books exist
@@ -136,8 +136,7 @@ public_users.get('/isbn/:isbn?',async (req, res) => {
     try {
         let isbn = req.params.isbn;
         isbn = (isbn || '').trim();
-        const books = await retrieveBooks();
-        
+        const books = await retrieveBooks();        
         if(isbn) {
             const selBook = books[isbn];
             if(selBook){
