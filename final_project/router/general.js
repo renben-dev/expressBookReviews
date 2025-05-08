@@ -76,7 +76,13 @@ const retrieveBooks = async () => {
   try {
     // Fetching from the local endpoint
     const response = await axios.get('http://localhost:5000/books');
-    return response.data;
+    const books = response.data;
+    // Check if books exist
+    if (Array.isArray(books) && books.length > 0) {
+        return books;
+    } else {
+        return { books: [], message: "No books available" };
+    }
   } catch (error) {
     console.error('Error retreiving books:', error);
     throw error;
@@ -84,7 +90,7 @@ const retrieveBooks = async () => {
 };
 
 // GET route to fetch book list from the root endpoint '/'
-app.get('/', async (req, res) => {
+public_users.get('/', async (req, res) => {
   try {
     const books = await retrieveBooks();
 
@@ -106,24 +112,48 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Get book details based on ISBN
-public_users.get('/isbn/:isbn?',function (req, res) {
-  //Write your code here
-  let isbn = req.params.isbn;
-  isbn = (isbn || '').trim();
-  if(isbn) {
-    const selBook = books[isbn];
-    if(selBook){
-        return res.send(JSON.stringify(selBook, null, 4));
-    } else {
-        return res.status(404).send("No books exist with ISBN = " + isbn);
+// // Get book details based on ISBN
+// public_users.get('/isbn/:isbn?',function (req, res) {
+//   //Write your code here
+//   let isbn = req.params.isbn;
+//   isbn = (isbn || '').trim();
+//   if(isbn) {
+//     const selBook = books[isbn];
+//     if(selBook){
+//         return res.send(JSON.stringify(selBook, null, 4));
+//     } else {
+//         return res.status(404).send("No books exist with ISBN = " + isbn);
+//     }
+//   }
+//   else {
+//     return res.status(400).send("No ISBN provided. Please send ISBN in GET request.");
+//   }
+//   //return res.status(300).json({message: "Yet to be implemented"});
+//  });
+
+// Get book details based on ISBN using Async/Await
+public_users.get('/isbn/:isbn?',async (req, res) => {
+    try {
+        let isbn = req.params.isbn;
+        isbn = (isbn || '').trim();
+        const books = await retrieveBooks();
+        
+        if(isbn) {
+            const selBook = books[isbn];
+            if(selBook){
+                return res.send(JSON.stringify(selBook, null, 4));
+            } else {
+                return res.status(404).send("No books exist with ISBN = " + isbn);
+            }
+            }
+        else {
+            return res.status(400).send("No ISBN provided. Please send ISBN in GET request.");
+        }
+    } catch(error) {
+        return res.status(500).send("An error occured while retrieving ISBN book data");
     }
-  }
-  else {
-    return res.status(400).send("No ISBN provided. Please send ISBN in GET request.");
-  }
-  //return res.status(300).json({message: "Yet to be implemented"});
- });
+  
+});
   
 // Get book details based on author
 public_users.get('/author/:author?',function (req, res) {
