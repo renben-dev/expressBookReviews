@@ -118,7 +118,7 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     return res.send("Dear " + reviewer +", your review has been updated");
   }
   else {
-    selReviews = selBook.reviews;
+    let selReviews = selBook.reviews;
     newReviewKey = Math.max(0, ...Object.keys(selReviews).map(Number));
     selReviews[newReviewKey] = {
         "reviewer"  :   reviewer,
@@ -144,20 +144,18 @@ regd_users.delete("/auth/review/:isbn", (req, res) => {
   if(!selBook){
     return res.status(400).send("Invalid ISBN");
   }
-  const existingReviews = Object.values(selBook.reviews).filter((review) => review.reviewer === reviewer);
+  const existingReviewKeys = Object.entries(selBook.reviews)
+  .filter(([key, review]) => review.reviewer === reviewer)
+  .map(([key, review]) => key);
 
-  if(existingReviews.length === 0) {
+  if(existingReviewKeys.length === 0) {
     return res.send("Dear " + reviewer +", there are no reviews to delete for book:\n\nISBN: " + isbn + "\n" + JSON.stringify(selBook,null,4) );
   }
   else {
-    selReviews = selBook.reviews;
-    newReviewKey = Math.max(0, ...Object.keys(selReviews).map(Number));
-    selReviews[newReviewKey] = {
-        "reviewer"  :   reviewer,
-        "rating"    :   rating,
-        "review"    :   reviewText
-    };
-    return res.send("Dear " + reviewer + " you review has been added. Thank you for contributing\n\nReviews to book ISBN: " +isbn +", '" + selBook.title + "' by " +selBook.author +"\n\nReviews: " + JSON.stringify(selReviews));
+    // Function to remove reviews with reviewer = username  
+    existingReviewKeys.forEach((key) => delete selBook.reviews[key]);
+      
+    return res.send("Dear "  + reviewer + ", your review has been deleted:\n\n" + JSON.stringify(selBook,null,4));
   }
 });
 
