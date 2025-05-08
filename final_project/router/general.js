@@ -40,7 +40,7 @@ public_users.post("/register", (req,res) => {
 });
 
 // Get the book list available in the shop
-public_users.get('/',function (req, res) {
+public_users.get('/books',function (req, res) {
   //Write your code here
     let booksExist = false;
     for (let key in books) {
@@ -51,13 +51,59 @@ public_users.get('/',function (req, res) {
     }
     if(booksExist) {
         //this is to preserve identation and stringify formatting
-        res.setHeader('Content-Type', 'text/plain');
+        //res.setHeader('Content-Type', 'text/plain');
         return res.send(JSON.stringify(books,null,4));
     } else {
         return res.send("We are revamping our store, book list will be available soon.");
     }
 
   //return res.status(300).json({message: "Yet to be implemented"});
+});
+
+// Local endpoint to fetch books
+public_users.get('/books', (req, res) => {
+    //simulates tdelay in retrieving data
+    setTimeout(() => {
+        console.log("This will be logged after 5 seconds");
+    }, 5000);
+
+  res.setHeader('Content-Type', 'application/json');
+  res.send(JSON.stringify(books, null, 4));
+});
+
+// Simulates API to get books from a DB
+const retrieveBooks = async () => {
+  try {
+    // Fetching from the local endpoint
+    const response = await axios.get('http://localhost:5000/books');
+    return response.data;
+  } catch (error) {
+    console.error('Error retreiving books:', error);
+    throw error;
+  }
+};
+
+// GET route to fetch book list from the root endpoint '/'
+app.get('/', async (req, res) => {
+  try {
+    const books = await retrieveBooks();
+
+    let booksExist = false;
+    for (let key in books) {
+      if (books.hasOwnProperty(key)) {
+        booksExist = true;
+        break;
+      }
+    }
+    if (booksExist) {
+      //res.setHeader('Content-Type', 'text/plain');
+      res.send(JSON.stringify(books, null, 4));
+    } else {
+      res.status(204).send("We are revamping our store, book list will be available soon.");
+    }
+  } catch (error) {
+    res.status(500).send("An error occurred: " + error.message);
+  }
 });
 
 // Get book details based on ISBN
